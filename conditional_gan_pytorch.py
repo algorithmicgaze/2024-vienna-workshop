@@ -194,8 +194,24 @@ def train(generator, discriminator, dataloader, args):
                 },
                 f"{args.output_dir}/snapshot_epoch_{epoch + 1}.pth",
             )
+
+            # Save to ONNX format
             onnx_path = f"{args.output_dir}/generator_epoch_{epoch + 1}.onnx"
-            export_onnx(generator, (3, 512, 512), onnx_path)
+            generator.eval()
+            dummy_input = torch.randn(1, 3, 512, 512).to(device)
+            torch.onnx.export(
+                generator,
+                dummy_input,
+                onnx_path,
+                export_params=True,
+                opset_version=11,
+                do_constant_folding=True,
+                input_names=["input"],
+                output_names=["output"],
+                dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+            )
+            print(f"ONNX model exported to {onnx_path}")
+            generator.train()
 
 
 # 7. Implement the argument parser for configuration
