@@ -4,3 +4,4 @@
 
 datasets/
 output/
+*.onnx
