@@ -172,7 +172,7 @@ def train(generator, discriminator, dataloader, args):
                     )
                     save_image(
                         img_sample,
-                        f"{args.output_dir}/epoch_{epoch}_iter_{i}.png",
+                        f"{args.output_dir}/epoch_{epoch}_iter_{i}.jpg",
                         nrow=3,
                         normalize=True,
                     )
