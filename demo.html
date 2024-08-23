@@ -47,7 +47,7 @@
 
         async function loadModel() {
             try {
-                session = await ort.InferenceSession.create('output/snapshot_epoch_1.onnx');
+                session = await ort.InferenceSession.create('output/generator_epoch_1.onnx');
                 console.log('Model loaded successfully');
             } catch (e) {
                 console.error('Failed to load the model:', e);
