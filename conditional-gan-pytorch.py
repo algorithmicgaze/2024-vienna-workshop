@@ -3,6 +3,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.onnx
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.utils import save_image
@@ -127,6 +128,12 @@ criterion_gan = nn.BCELoss()
 criterion_pixel = nn.L1Loss()
 
 
+def export_onnx(generator, input_shape, file_path):
+    dummy_input = torch.randn(1, *input_shape, device=device)
+    torch.onnx.export(generator, dummy_input, file_path, verbose=True, opset_version=11)
+    print(f"ONNX model exported to {file_path}")
+
+
 # 6. Create the training loop
 def train(generator, discriminator, dataloader, args):
     g_optimizer = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
@@ -187,6 +194,8 @@ def train(generator, discriminator, dataloader, args):
                 },
                 f"{args.output_dir}/snapshot_epoch_{epoch + 1}.pth",
             )
+            onnx_path = f"{args.output_dir}/generator_epoch_{epoch + 1}.onnx"
+            export_onnx(generator, (3, 512, 512), onnx_path)
 
 
 # 7. Implement the argument parser for configuration

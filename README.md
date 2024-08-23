@@ -2,6 +2,12 @@
 
 Conditional training script for RAIVE summer school.
 
+## Installation
+
+```bash
+pip install torch torchvision onnx pillow
+```
+
 ## Running
 
 ```bash
