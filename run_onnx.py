@@ -52,6 +52,7 @@ def main():
     input_array = np.expand_dims(input_array, axis=0)
 
     # Print stats of the image (min/max values)
+    print(f"Input shape: {input_array.shape}")
     print(f"Input min: {input_array.min()}")
     print(f"Input max: {input_array.max()}")
     print(f"Input mean: {input_array.mean()}")
@@ -59,6 +60,13 @@ def main():
 
     # Run inference
     output_array = run_inference(onnx_session, input_array)
+
+    # Print stats of the output image (min/max values)
+    print(f"Output shape: {output_array.shape}")
+    print(f"Output min: {output_array.min()}")
+    print(f"Output max: {output_array.max()}")
+    print(f"Output mean: {output_array.mean()}")
+    print(f"Output std: {output_array.std()}")
 
     # Postprocess and save output image
     output_image = postprocess_image(output_array[0])  # Remove batch dimension

@@ -49,7 +49,8 @@ def main():
     # Preprocess input image
     input_tensor = preprocess_image(args.input_image_path)
 
-    # Print stats of the image (min/max values)
+    # Print stats of the input image (min/max values)
+    print(f"Input shape: {input_tensor.shape}")
     print(f"Input min: {input_tensor.min()}")
     print(f"Input max: {input_tensor.max()}")
     print(f"Input mean: {input_tensor.mean()}")
@@ -57,6 +58,13 @@ def main():
 
     # Run inference
     output_tensor = run_inference(generator, input_tensor)
+
+    # Print stats of the output image (min/max values)
+    print(f"Output shape: {output_tensor.shape}")
+    print(f"Output min: {output_tensor.min()}")
+    print(f"Output max: {output_tensor.max()}")
+    print(f"Output mean: {output_tensor.mean()}")
+    print(f"Output std: {output_tensor.std()}")
 
     # Postprocess and save output image
     output_image = postprocess_image(output_tensor)
