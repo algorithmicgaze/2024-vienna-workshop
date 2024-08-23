@@ -7,13 +7,44 @@
     <title>Interactive ONNX Web Runtime Inference</title>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
     <style>
+        html,
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         canvas {
-            border: 1px solid black;
+            border: 1px solid #aaa;
         }
 
         .side-by-side {
             display: flex;
             gap: 1rem;
+        }
+
+        .popup-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .popup {
+            position: absolute;
+            top: 300px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -25,9 +56,13 @@
         <canvas id="outputCanvas" width="512" height="512"></canvas>
     </div>
     <br>
-    <button onclick="clearCanvas()">Clear Canvas</button>
-    <button onclick="runInference()">Run Inference</button>
+    <div class="controls"><button onclick="clearCanvas()">Clear Canvas</button>
+        <button onclick="runInference()">Run Inference</button>
+    </div>
     <br>
+    <div class="popup-wrapper">
+        <div class="popup">Loading model (207MB)...</div>
+    </div>
 
     <script>
         let session;
@@ -40,17 +75,19 @@
         img.onload = () => {
             ctx.drawImage(img, 0, 0);
         };
-        img.src = 'trees_control.jpg';
+        img.src = 'trees_control.png';
 
 
         let isDrawing = false;
 
         async function loadModel() {
             try {
-                session = await ort.InferenceSession.create('output/generator_epoch_1.onnx');
+                session = await ort.InferenceSession.create('generator_epoch_20.onnx');
                 console.log('Model loaded successfully');
+                document.querySelector('.popup-wrapper').style.display = 'none';
             } catch (e) {
                 console.error('Failed to load the model:', e);
+                document.querySelector('.popup').textContent = 'Failed to load the model: ' + e;
             }
         }
 
