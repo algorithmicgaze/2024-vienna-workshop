@@ -32,7 +32,7 @@
     <script>
         let session;
         const inputCanvas = document.getElementById('inputCanvas');
-        const ctx = inputCanvas.getContext('2d');
+        const ctx = inputCanvas.getContext('2d', { willReadFrequently: true });
         clearCanvas();
 
         // Load the control image and draw it on the canvas
@@ -71,7 +71,7 @@
 
         function draw(e) {
             if (!isDrawing) return;
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.strokeStyle = 'black';
 
@@ -86,7 +86,7 @@
             ctx.beginPath();
         }
 
-        function calcStats(buffer) {
+        function calcStats(prefix, buffer) {
             let min = buffer[0];
             let max = buffer[0];
             let sum = 0;
@@ -99,31 +99,30 @@
             }
 
             const mean = sum / buffer.length;
-            console.log('Min:', min, 'Max:', max, 'Mean:', mean);
+            console.log(prefix, 'Min:', min, 'Max:', max, 'Mean:', mean);
         }
 
         async function runInference() {
             const imageData = ctx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
             const input = new Float32Array(3 * 512 * 512);
-            console.log(imageData);
-            calcStats(imageData.data);
+            const channelSize = 512 * 512;
+            calcStats('Canvas data', imageData.data);
 
+            // ONNX expects images in NCHW format, so we need to have all channels after each other.
+            // In other words, first all red pixels, then all green pixels, and finally all blue pixels.
             for (let y = 0; y < 512; y++) {
                 for (let x = 0; x < 512; x++) {
                     const inOffset = (y * 512 + x) * 4;
-                    const outOffset = (y * 512 + x) * 3;
-
-                    input[outOffset] = (imageData.data[inOffset] / 255.0 - 0.5) / 0.5;
-                    input[outOffset + 1] = (imageData.data[inOffset + 1] / 255.0 - 0.5) / 0.5;
-                    input[outOffset + 2] = (imageData.data[inOffset + 2] / 255.0 - 0.5) / 0.5;
-                    if (y === 0) {
-                        console.log(inOffset, imageData.data[inOffset], input[outOffset]);
-                    }
+                    const redOffset = (y * 512 + x);
+                    const greenOffset = redOffset + channelSize;
+                    const blueOffset = redOffset + channelSize * 2;
+                    input[redOffset] = (imageData.data[inOffset] / 255.0 - 0.5) / 0.5;
+                    input[greenOffset] = (imageData.data[inOffset + 1] / 255.0 - 0.5) / 0.5;
+                    input[blueOffset] = (imageData.data[inOffset + 2] / 255.0 - 0.5) / 0.5;
                 }
             }
 
-            console.log(input)
-            calcStats(input);
+            calcStats('Input tensor', input);
 
             const tensorInput = new ort.Tensor('float32', input, [1, 3, 512, 512]);
 
@@ -131,6 +130,7 @@
             const outputs = await session.run({ 'input': tensorInput });
             const outputData = outputs['output'].data;
             console.log(outputs);
+            calcStats('Output tensor', outputData);
 
             // Convert output to image
             const outputCanvas = document.getElementById('outputCanvas');
