@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive ONNX Web Runtime Inference</title>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+
+        .side-by-side {
+            display: flex;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Interactive ONNX Web Runtime Inference</h1>
+    <div class="side-by-side">
+        <canvas id="inputCanvas" width="512" height="512"></canvas>
+        <canvas id="outputCanvas" width="512" height="512"></canvas>
+    </div>
+    <br>
+    <button onclick="clearCanvas()">Clear Canvas</button>
+    <button onclick="runInference()">Run Inference</button>
+    <br>
+
+    <script>
+        let session;
+        const inputCanvas = document.getElementById('inputCanvas');
+        const ctx = inputCanvas.getContext('2d');
+        clearCanvas();
+
+        // Load the control image and draw it on the canvas
+        const img = new Image();
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'trees_control.jpg';
+
+
+        let isDrawing = false;
+
+        async function loadModel() {
+            try {
+                session = await ort.InferenceSession.create('output/snapshot_epoch_1.onnx');
+                console.log('Model loaded successfully');
+            } catch (e) {
+                console.error('Failed to load the model:', e);
+            }
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, inputCanvas.width, inputCanvas.height);
+        }
+
+        inputCanvas.addEventListener('mousedown', startDrawing);
+        inputCanvas.addEventListener('mousemove', draw);
+        inputCanvas.addEventListener('mouseup', stopDrawing);
+        inputCanvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+
+            ctx.lineTo(e.clientX - inputCanvas.offsetLeft, e.clientY - inputCanvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - inputCanvas.offsetLeft, e.clientY - inputCanvas.offsetTop);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function calcStats(buffer) {
+            let min = buffer[0];
+            let max = buffer[0];
+            let sum = 0;
+
+            for (let i = 0; i < buffer.length; i++) {
+                const value = buffer[i];
+                min = Math.min(min, value);
+                max = Math.max(max, value);
+                sum += value;
+            }
+
+            const mean = sum / buffer.length;
+            console.log('Min:', min, 'Max:', max, 'Mean:', mean);
+        }
+
+        async function runInference() {
+            const imageData = ctx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+            const input = new Float32Array(3 * 512 * 512);
+            console.log(imageData);
+            calcStats(imageData.data);
+
+            for (let y = 0; y < 512; y++) {
+                for (let x = 0; x < 512; x++) {
+                    const inOffset = (y * 512 + x) * 4;
+                    const outOffset = (y * 512 + x) * 3;
+
+                    input[outOffset] = (imageData.data[inOffset] / 255.0 - 0.5) / 0.5;
+                    input[outOffset + 1] = (imageData.data[inOffset + 1] / 255.0 - 0.5) / 0.5;
+                    input[outOffset + 2] = (imageData.data[inOffset + 2] / 255.0 - 0.5) / 0.5;
+                    if (y === 0) {
+                        console.log(inOffset, imageData.data[inOffset], input[outOffset]);
+                    }
+                }
+            }
+
+            console.log(input)
+            calcStats(input);
+
+            const tensorInput = new ort.Tensor('float32', input, [1, 3, 512, 512]);
+
+            // Run inference
+            const outputs = await session.run({ 'input': tensorInput });
+            const outputData = outputs['output'].data;
+            console.log(outputs);
+
+            // Convert output to image
+            const outputCanvas = document.getElementById('outputCanvas');
+            const outputCtx = outputCanvas.getContext('2d');
+            const outputImageData = outputCtx.createImageData(512, 512);
+
+            // Assuming outputData is in NCHW format
+            for (let y = 0; y < 512; y++) {
+                for (let x = 0; x < 512; x++) {
+                    for (let c = 0; c < 3; c++) {
+                        const value = outputData[c * 512 * 512 + y * 512 + x];
+                        const pixelIndex = (y * 512 + x) * 4 + c;
+                        outputImageData.data[pixelIndex] = Math.max(0, Math.min(255, Math.round((value * 0.5 + 0.5) * 255)));
+                    }
+                    outputImageData.data[(y * 512 + x) * 4 + 3] = 255;  // Alpha channel
+                }
+            }
+
+            outputCtx.putImageData(outputImageData, 0, 0);
+        }
+
+
+        // Load the model when the page loads
+        loadModel();
+    </script>
+</body>
+
+</html>
