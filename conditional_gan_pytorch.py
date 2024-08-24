@@ -223,8 +223,9 @@ def train(generator, discriminator, dataloader, args):
             onnx_path = f"{args.output_dir}/generator_epoch_{epoch + 1}.onnx"
             generator.eval()
             dummy_input = torch.randn(1, 3, 512, 512).to(device)
+            traced_script_module = torch.jit.trace(generator, dummy_input)
             torch.onnx.export(
-                generator,
+                traced_script_module,
                 dummy_input,
                 onnx_path,
                 export_params=True,
