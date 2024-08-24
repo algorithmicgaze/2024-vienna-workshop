@@ -1,5 +1,4 @@
-# 1. Set up the project structure and import necessary libraries
-
+import glob
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,7 +13,7 @@ import argparse
 from tqdm import tqdm
 
 
-# 2. Create the dataset class
+# Create the dataset class
 class Pix2PixDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
@@ -42,7 +41,7 @@ class Pix2PixDataset(Dataset):
         return input_image, target_image
 
 
-# 3. Implement the UNet architecture for the generator
+# Implement the UNet architecture for the generator
 class UNetBlock(nn.Module):
     def __init__(self, in_channels, out_channels, down=True, bn=True, dropout=False):
         super(UNetBlock, self).__init__()
@@ -106,7 +105,7 @@ class Generator(nn.Module):
         return self.final(torch.cat([u7, d1], 1))
 
 
-# 4. Implement the discriminator
+# Implement the discriminator
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
@@ -123,15 +122,27 @@ class Discriminator(nn.Module):
         return self.model(torch.cat([x, y], 1))
 
 
-# 5. Define the loss functions and optimizers
+# Define the loss functions and optimizers
 criterion_gan = nn.BCELoss()
 criterion_pixel = nn.L1Loss()
 
 
-def export_onnx(generator, input_shape, file_path):
-    dummy_input = torch.randn(1, *input_shape, device=device)
-    torch.onnx.export(generator, dummy_input, file_path, verbose=True, opset_version=11)
-    print(f"ONNX model exported to {file_path}")
+# Load snapshot if available
+def get_latest_snapshot(output_dir):
+    snapshots = glob.glob(os.path.join(output_dir, "snapshot_epoch_*.pth"))
+    if not snapshots:
+        return None
+    return max(snapshots, key=os.path.getctime)
+
+
+def load_snapshot(generator, discriminator, g_optimizer, d_optimizer, snapshot_path):
+    checkpoint = torch.load(snapshot_path, map_location=device, weights_only=False)
+    generator.load_state_dict(checkpoint["generator"])
+    discriminator.load_state_dict(checkpoint["discriminator"])
+    g_optimizer.load_state_dict(checkpoint["g_optimizer"])
+    d_optimizer.load_state_dict(checkpoint["d_optimizer"])
+    start_epoch = int(os.path.basename(snapshot_path).split("_")[2].split(".")[0])
+    return start_epoch
 
 
 # 6. Create the training loop
@@ -144,6 +155,19 @@ def train(generator, discriminator, dataloader, args):
     fixed_input = fixed_set[0][0].unsqueeze(0)
     fixed_target = fixed_set[1][0].unsqueeze(0)
     # fixed_input = next(iter(dataloader))[0][0].unsqueeze(0)  # Get a fixed input for visualization
+
+    start_epoch = 0
+    if not args.restart:
+        latest_snapshot = get_latest_snapshot(args.output_dir)
+        if latest_snapshot:
+            start_epoch = load_snapshot(
+                generator, discriminator, g_optimizer, d_optimizer, latest_snapshot
+            )
+            print(f"Resuming training from epoch {start_epoch}")
+        else:
+            print("No snapshots found. Starting from scratch.")
+    else:
+        print("Restarting training from scratch.")
 
     for epoch in range(args.epochs):
         for i, (input_img, target_img) in enumerate(tqdm(dataloader)):
@@ -247,6 +271,9 @@ def parse_args():
         "--epochs", type=int, default=200, help="Number of epochs to train"
     )
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
+    parser.add_argument(
+        "--restart", action="store_true", help="Restart training from scratch"
+    )
     return parser.parse_args()
 
 
