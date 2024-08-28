@@ -92,6 +92,7 @@
 
       async function loadModel() {
         try {
+          ort.env.webgpu.powerPreference = "high-performance";
           session = await ort.InferenceSession.create("generator_epoch_20.onnx", {
             enableGraphCapture: true,
             executionProviders: ["webgpu"],
