@@ -80,7 +80,7 @@ Once the model has trained, you can build a Figment file to load it in. The key 
 
 If you don't have a model yet, you can download a complete prepared model from this link:
 
-Next Steps
+## Next Steps
 
 Once the model is trained, try feeding in different things than a face. What happens if the lines are hands? Or shapes? Can you scan a drawing with your webcam and control the face that way?
 
