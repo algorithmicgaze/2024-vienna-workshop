@@ -1,0 +1,100 @@
+{
+  "version": 2,
+  "nodes": [
+    {
+      "id": 6,
+      "name": "Out",
+      "type": "core.out",
+      "x": 363.17273924769734,
+      "y": 537.9226918607244
+    },
+    {
+      "id": 7,
+      "name": "ONNX Image Model",
+      "type": "ml.onnxImageModel",
+      "x": 351.08486713050576,
+      "y": 432.77368765198435,
+      "values": {
+        "model": {
+          "type": "value",
+          "value": "generator_epoch_100.onnx"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "name": "Transform",
+      "type": "image.transform",
+      "x": 372,
+      "y": 159,
+      "values": {
+        "scaleX": {
+          "type": "value",
+          "value": -1.4
+        },
+        "scaleY": {
+          "type": "value",
+          "value": 1.4
+        }
+      }
+    },
+    {
+      "id": 10,
+      "name": "Webcam Image",
+      "type": "image.webcamImage",
+      "x": 349,
+      "y": 75
+    },
+    {
+      "id": 11,
+      "name": "Resize",
+      "type": "image.resize",
+      "x": 437,
+      "y": 267
+    },
+    {
+      "id": 12,
+      "name": "Detect Faces",
+      "type": "ml.detectFaces",
+      "x": 372,
+      "y": 354
+    }
+  ],
+  "connections": [
+    {
+      "outNode": 7,
+      "outPort": "out",
+      "inNode": 6,
+      "inPort": "in"
+    },
+    {
+      "outNode": 10,
+      "outPort": "image",
+      "inNode": 9,
+      "inPort": "in"
+    },
+    {
+      "outNode": 9,
+      "outPort": "out",
+      "inNode": 11,
+      "inPort": "in"
+    },
+    {
+      "outNode": 11,
+      "outPort": "out",
+      "inNode": 12,
+      "inPort": "in"
+    },
+    {
+      "outNode": 12,
+      "outPort": "out",
+      "inNode": 7,
+      "inPort": "in"
+    }
+  ],
+  "settings": {
+    "oscEnabled": false,
+    "oscPort": 8000
+  },
+  "types": []
+}

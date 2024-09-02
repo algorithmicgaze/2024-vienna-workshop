@@ -78,7 +78,11 @@ python conditional-gan-pytorch.py --input_dir datasets/trees --output_dir output
 
 Once the model has trained, you can build a Figment file to load it in. The key node is [ONNX Image Model](https://figmentapp.com/docs/nodes/onnx-image-model) where you can load your model on an input image and get a real-time output.
 
-If you don't have a model yet, you can download a complete prepared model from this link:
+If you don't have a model yet, you can download a prepared model + Figment file from this link:
+
+[face_onnx_demo.zip](https://algorithmicgaze.s3.amazonaws.com/workshops/2024-raive/models/faces_segmented/face_onnx_demo.zip)
+
+Open this Figment file to run the model on a webcam feed.
 
 ## Next Steps
 
