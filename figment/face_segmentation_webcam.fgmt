@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": 7,
+      "name": "Out",
+      "type": "core.out",
+      "x": 161.56431132433156,
+      "y": 655.9844779660992
+    },
+    {
+      "id": 8,
+      "name": "Webcam Image",
+      "type": "image.webcamImage",
+      "x": 142,
+      "y": 55
+    },
+    {
+      "id": 9,
+      "name": "Detect Faces",
+      "type": "ml.detectFaces",
+      "x": 232.26389472039997,
+      "y": 346.78780868825714
+    },
+    {
+      "id": 10,
+      "name": "Detect Hands",
+      "type": "ml.detectHands",
+      "x": 376.41744276094283,
+      "y": 349
+    },
+    {
+      "id": 11,
+      "name": "Resize",
+      "type": "image.resize",
+      "x": 203,
+      "y": 233
+    },
+    {
+      "id": 12,
+      "name": "Transform",
+      "type": "image.transform",
+      "x": 245,
+      "y": 158,
+      "values": {
+        "scaleX": -1
+      }
+    },
+    {
+      "id": 13,
+      "name": "Stack",
+      "type": "image.stack",
+      "x": 147.95973032650664,
+      "y": 579.7437874280201
+    },
+    {
+      "id": 14,
+      "name": "Composite",
+      "type": "image.composite",
+      "x": 295.93259178572663,
+      "y": 471.72014510802165,
+      "values": {
+        "factor": 1,
+        "operation": "lighten"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Save Image",
+      "type": "image.saveImage",
+      "x": 187.08016547292934,
+      "y": 745.0839870181331,
+      "values": {
+        "folder": "output",
+        "template": "image-#####.jpg"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "outNode": 8,
+      "outPort": "image",
+      "inNode": 12,
+      "inPort": "in"
+    },
+    {
+      "outNode": 12,
+      "outPort": "out",
+      "inNode": 11,
+      "inPort": "in"
+    },
+    {
+      "outNode": 11,
+      "outPort": "out",
+      "inNode": 9,
+      "inPort": "in"
+    },
+    {
+      "outNode": 11,
+      "outPort": "out",
+      "inNode": 10,
+      "inPort": "in"
+    },
+    {
+      "outNode": 9,
+      "outPort": "out",
+      "inNode": 14,
+      "inPort": "image 1"
+    },
+    {
+      "outNode": 10,
+      "outPort": "out",
+      "inNode": 14,
+      "inPort": "image 2"
+    },
+    {
+      "outNode": 11,
+      "outPort": "out",
+      "inNode": 13,
+      "inPort": "image 1"
+    },
+    {
+      "outNode": 14,
+      "outPort": "out",
+      "inNode": 13,
+      "inPort": "image 2"
+    },
+    {
+      "outNode": 13,
+      "outPort": "out",
+      "inNode": 7,
+      "inPort": "in"
+    },
+    {
+      "outNode": 7,
+      "outPort": "out",
+      "inNode": 15,
+      "inPort": "in"
+    }
+  ],
+  "types": []
+}

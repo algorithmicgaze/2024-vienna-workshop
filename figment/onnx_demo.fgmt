@@ -1,0 +1,76 @@
+{
+  "version": 2,
+  "nodes": [
+    {
+      "id": 6,
+      "name": "Out",
+      "type": "core.out",
+      "x": 473.17273924769734,
+      "y": 500.92269186072446
+    },
+    {
+      "id": 7,
+      "name": "ONNX Image Model",
+      "type": "ml.onnxImageModel",
+      "x": 461.08486713050576,
+      "y": 387.77368765198435,
+      "values": {
+        "model": {
+          "type": "value",
+          "value": "generator_epoch_20.onnx"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "name": "Load Image",
+      "type": "image.loadImage",
+      "x": 445,
+      "y": 155,
+      "values": {
+        "file": {
+          "type": "value",
+          "value": "trees_control.png"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "name": "Transform",
+      "type": "image.transform",
+      "x": 491,
+      "y": 269,
+      "values": {
+        "rotate": {
+          "type": "value",
+          "value": 159
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "outNode": 8,
+      "outPort": "out",
+      "inNode": 9,
+      "inPort": "in"
+    },
+    {
+      "outNode": 9,
+      "outPort": "out",
+      "inNode": 7,
+      "inPort": "in"
+    },
+    {
+      "outNode": 7,
+      "outPort": "out",
+      "inNode": 6,
+      "inPort": "in"
+    }
+  ],
+  "settings": {
+    "oscEnabled": false,
+    "oscPort": 8000
+  },
+  "types": []
+}
