@@ -21,7 +21,7 @@ Save all output files as `.jpg` files in a directory; then create a ZIP file of 
 
 The `train_onnx_model_colab.ipynb` notebook contains the code to train a model on Google Colab.
 
-**[Open training notebook in Colab](https://colab.research.google.com/github/algorithmicgaze/raive-2024/blob/main/train_onnx_model_colab.ipynb)**
+**[Open training notebook in Colab](https://colab.research.google.com/github/algorithmicgaze/2024-vienna-workshop/blob/main/train_onnx_model_colab.ipynb)**
 
 1. Click the link above
 2. Run the first cell by pressing Shift + Enter. You'll get a warning that the notebook was not authored by Google. Click "Run Anyway".
