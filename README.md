@@ -1,6 +1,6 @@
 # Vienna 2024 AI Workshop
 
-![Banner](.github/raive-hero-image.png)
+![Banner](.github/hero-image.jpg)
 
 This repository contains [Figment](https://figmentapp.com/) files and training notebooks for the Vienna 2024 AI Workshop.
 
