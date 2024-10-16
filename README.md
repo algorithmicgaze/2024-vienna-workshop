@@ -46,6 +46,7 @@ cd 2024-vienna-workshop
 5. Install dependencies:
 
 ```bash
+apt update && apt install -y unzip
 pip install tqdm matplotlib
 ```
 
