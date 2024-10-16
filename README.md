@@ -31,6 +31,24 @@ The `train_onnx_model_colab.ipynb` notebook contains the code to train a model o
 
 If you have [Colab Pro](https://colab.research.google.com/signup/pricing), the script will execute substantially faster.
 
+## Training on Runpod
+
+1. Create a Pod with PyTorch 2.4
+2. Connect to Jupyter Lab
+3. Open a terminal
+4. Clone the repository:
+
+```bash
+git clone https://github.com/algorithmicgaze/2024-vienna-workshop.git
+cd 2024-vienna-workshop
+```
+
+5. Install dependencies:
+
+```bash
+pip install tqdm matplotlib
+```
+
 ## Training On Your Own Machine
 
 The `train_onnx_model_local.ipynb` notebook runs in Jupyter Notebook. Here's some setup to do first:
